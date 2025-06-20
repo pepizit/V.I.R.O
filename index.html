@@ -2,133 +2,142 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Arcadium OS</title>
-  <style>
-    body {
-      background: black;
-      color: #33ff33;
-      font-family: 'Courier New', monospace;
-      padding: 20px;
-      overflow: hidden;
-      animation: flickerBg 3s infinite;
-    }
-
-    @keyframes flickerBg {
-      0%, 100% { background-color: #000; }
-      50% { background-color: #050505; }
-    }
-
-    #terminal {
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    #output {
-      white-space: pre-wrap;
-      min-height: 300px;
-    }
-
-    #input-line {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    input {
-      background: black;
-      border: none;
-      color: #33ff33;
-      font-family: inherit;
-      font-size: 1em;
-      outline: none;
-      width: 100%;
-    }
-
-    .cursor {
-      display: inline-block;
-      width: 10px;
-      background: #33ff33;
-      animation: blink 0.8s step-end infinite;
-      margin-left: 3px;
-    }
-
-    @keyframes blink {
-      50% { background: transparent; }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Arcadium Mall Terminal</title>
+<style>
+  body {
+    margin: 0; padding: 0;
+    background: #0a0a0a;
+    color: #33ff33;
+    font-family: 'Courier New', Courier, monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  #terminal {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  #inputLine {
+    display: flex;
+    padding: 10px 15px;
+    background: #111;
+    border-top: 1px solid #222;
+  }
+  #inputLine span {
+    margin-right: 10px;
+  }
+  #commandInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #33ff33;
+    font-family: 'Courier New', monospace;
+    font-size: 1rem;
+    outline: none;
+  }
+  ::selection {
+    background: #33ff33;
+    color: black;
+  }
+  .output {
+    margin-bottom: 10px;
+  }
+</style>
 </head>
 <body>
-  <div id="terminal">
-    <div id="output"></div>
-    <div id="input-line">
-      <span>&gt;</span>
-      <input id="input" type="text" autofocus autocomplete="off" />
-    </div>
-  </div>
 
-  <script>
-    const input = document.getElementById('input');
-    const output = document.getElementById('output');
+<div id="terminal"></div>
 
-    const respostas = {
-      help: "Comandos disponíveis:\n- status\n- acesso\n- conectar\n- limpar",
-      status: "🗂  Verificando status...\n\n- Núcleo do shopping: FRÁGIL\n- Câmeras: ONLINE\n- Portas: INSTÁVEIS\n- Interferência: DESCONHECIDA",
-      acesso: "🔐 Acesso negado. Chave de segurança ausente.\nMensagem do sistema: \"eles ainda estão aqui...\"",
-      conectar: "🌐 Estabelecendo conexão com o sistema...\n...\n...\nCONEXÃO INSTÁVEL\nMensagem interceptada: 'não acorde o que dorme abaixo'.",
-      limpar: "[Terminal reiniciado]",
-    };
+<div id="inputLine">
+  <span>&gt;</span>
+  <input type="text" id="commandInput" autocomplete="off" autofocus placeholder="digite um comando..." />
+</div>
 
-    const iniciarTexto = [
-      "Inicializando sistema central do Arcadium Mall...",
-      "Verificando integridade do disco...",
-      "⚠ Erros detectados.",
-      "Tentando restaurar conexão com o servidor principal...",
-      "...\n...\nConexão parcial estabelecida.\nDigite 'help' para comandos disponíveis.\n"
-    ];
+<script>
+  const terminal = document.getElementById('terminal');
+  const input = document.getElementById('commandInput');
 
-    let index = 0;
+  const comandos = {
+    help: `
+Comandos disponíveis:
+- help: mostra essa ajuda
+- status: mostra o status do sistema
+- mapa: exibe as áreas do Arcadium Mall
+- segredos: lista segredos escondidos
+- contato: informações para contato
+- sair: encerra a sessão
+`,
 
-    function escreverLinha(texto, delay = 50, callback) {
-      let i = 0;
-      const interval = setInterval(() => {
-        if (i < texto.length) {
-          output.innerText += texto.charAt(i);
-          i++;
-        } else {
-          clearInterval(interval);
-          output.innerText += '\n';
-          if (callback) callback();
+    status: `
+Status do sistema Arcadium Mall:
+- Hardware: 98% funcional
+- Software: rodando sem erros críticos
+- Rede: conexão estável
+- Última verificação: 2025-06-20 23:42
+`,
+
+    mapa: `
+Mapa do Arcadium Mall:
+- 🛍 Loja Central
+- 🎉 Praça de Eventos
+- 🎬 Cinema Retrô
+- 🍔 Food Court
+- 🚪 Saída de Emergência
+`,
+
+    segredos: `
+Segredos ocultos do Arcadium Mall:
+- O porão tem uma sala trancada que ninguém visita
+- Uma frequência misteriosa toca na rádio do shopping
+- Alguns anúncios mudam quando você não está olhando
+`,
+
+    contato: `
+Para suporte, envie e-mail para suporte@arcadiummall.fake
+Ou ligue para: (11) 99999-0000
+`,
+
+    sair: `
+Encerrando sessão... Até a próxima!
+`,
+  };
+
+  function printOutput(text) {
+    const div = document.createElement('div');
+    div.classList.add('output');
+    div.textContent = text.trim();
+    terminal.appendChild(div);
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const comandoDigitado = input.value.trim().toLowerCase();
+      if (!comandoDigitado) return;
+
+      printOutput(> ${comandoDigitado});
+
+      if (comandos[comandoDigitado]) {
+        printOutput(comandos[comandoDigitado]);
+        if (comandoDigitado === 'sair') {
+          input.disabled = true;
+          input.placeholder = 'Sessão encerrada';
         }
-      }, delay);
-    }
-
-    function iniciarSistema() {
-      if (index < iniciarTexto.length) {
-        escreverLinha(iniciarTexto[index], 30, () => {
-          index++;
-          iniciarSistema();
-        });
+      } else {
+        printOutput(Comando "${comandoDigitado}" não reconhecido. Digite "help" para ajuda.);
       }
+
+      input.value = '';
     }
+  });
 
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        const cmd = input.value.trim().toLowerCase();
-        const resposta = respostas[cmd] || "❓ Comando não reconhecido. Digite 'help' para ajuda.";
-        if (cmd === "limpar") {
-          output.innerText = "";
-        } else {
-          output.innerText += \n> ${cmd}\n${resposta}\n;
-        }
-        input.value = "";
-        window.scrollTo(0, document.body.scrollHeight);
-      }
-    });
+  // Boas-vindas
+  printOutput('Bem-vindo ao terminal do Arcadium Mall.\nDigite "help" para ver os comandos disponíveis.');
+</script>
 
-    // Iniciar sistema ao carregar
-    iniciarSistema();
-  </script>
 </body>
 </html>
